@@ -1,0 +1,336 @@
+My Setup
+Have the 2 clusters up and running on GKE
+
+Note: I will configure this in a separate .kube config folder called HYBRID, because the certificate with docker desktop is not working with this context switching method. So run this demo with just GKE clusters so I do not corrupt the docker desktop setup
+
+/Users/davemastropolo/.kube/course5_GKE_HYBRID_CLUSTER
+
+The gcloud container get credentials will create fresh entries.
+
+
+
+
+
+Empty the config file.
+Just need a dummy file
+
+
+
+
+
+
+Change KUBECONFIG to point to this HYBRID directory above
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % export KUBECONFIG=/Users/davemastropolo/.kube/course5_GKE_HYBRID_CLUSTER/config
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % echo $KUBECONFIG
+/Users/davemastropolo/.kube/course5_GKE_HYBRID_CLUSTER/config
+
+Note the config file is blank so we see this:
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config view
+apiVersion: v1
+clusters: null
+contexts: null
+current-context: ""
+kind: Config
+preferences: {}
+users: null
+
+
+
+Configure standard cluster
+Kubectl config view
+
+
+gcloud container clusters get-credentials standard-cluster-private-1 --region us-central1 --project project7-390220
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % gcloud container clusters get-credentials standard-cluster-private-1 --region us-central1 --project project7-390220
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for standard-cluster-private-1.
+
+
+
+Verify the config view
+Kubectl config view
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config view
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://34.28.66.170
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+contexts:
+- context:
+    cluster: gke_project7-390220_us-central1_standard-cluster-private-1
+    user: gke_project7-390220_us-central1_standard-cluster-private-1
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+current-context: gke_project7-390220_us-central1_standard-cluster-private-1
+kind: Config
+preferences: {}
+users:
+- name: gke_project7-390220_us-central1_standard-cluster-private-1
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args: null
+      command: gke-gcloud-auth-plugin
+      env: null
+      installHint: Install gke-gcloud-auth-plugin for use with kubectl by following
+        https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+      interactiveMode: IfAvailable
+      provideClusterInfo: true
+
+
+
+Show current context
+Kubectl config current-context
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config current-context
+gke_project7-390220_us-central1_standard-cluster-private-1
+
+
+
+
+
+Kubectl cluster-info
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl cluster-info
+Kubernetes control plane is running at https://34.28.66.170
+GLBCDefaultBackend is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+KubeDNS is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get nodes
+NAME                                                  STATUS   ROLES    AGE     VERSION
+gke-standard-cluster-pri-default-pool-a7f4fa81-7s4l   Ready    <none>   32h     v1.26.5-gke.1200
+gke-standard-cluster-pri-default-pool-aa4258fb-wtwx   Ready    <none>   36h     v1.26.5-gke.1200
+gke-standard-cluster-pri-default-pool-e06e7d2b-7zb3   Ready    <none>   5h41m   v1.26.5-gke.1200
+
+
+
+
+
+
+
+
+Configure autopilot cluster
+
+
+Kubectl config view
+Same as above
+
+gcloud container clusters get-credentials autopilot-cluster-private-1 --region us-central1 --project project7-390220
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % gcloud container clusters get-credentials autopilot-cluster-private-1 --region us-central1 --project project7-390220
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for autopilot-cluster-private-1.
+
+
+Verify the config view
+Kubectl config view
+Both are now present as expected
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config view
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://34.31.186.162
+  name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://34.28.66.170
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+contexts:
+- context:
+    cluster: gke_project7-390220_us-central1_autopilot-cluster-private-1
+    user: gke_project7-390220_us-central1_autopilot-cluster-private-1
+  name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+- context:
+    cluster: gke_project7-390220_us-central1_standard-cluster-private-1
+    user: gke_project7-390220_us-central1_standard-cluster-private-1
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+current-context: gke_project7-390220_us-central1_autopilot-cluster-private-1
+kind: Config
+preferences: {}
+users:
+- name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args: null
+      command: gke-gcloud-auth-plugin
+      env: null
+      installHint: Install gke-gcloud-auth-plugin for use with kubectl by following
+        https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+      interactiveMode: IfAvailable
+      provideClusterInfo: true
+- name: gke_project7-390220_us-central1_standard-cluster-private-1
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args: null
+      command: gke-gcloud-auth-plugin
+      env: null
+      installHint: Install gke-gcloud-auth-plugin for use with kubectl by following
+        https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+      interactiveMode: IfAvailable
+      provideClusterInfo: true
+
+
+
+Show current context
+Kubectl config current-context
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config current-context
+gke_project7-390220_us-central1_autopilot-cluster-private-1
+
+note the context has switched after running the gcloud autopiolot command
+
+
+
+
+
+
+Kubectl cluster-info
+
+avemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl cluster-info
+Kubernetes control plane is running at https://34.31.186.162
+GLBCDefaultBackend is running at https://34.31.186.162/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+KubeDNS is running at https://34.31.186.162/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+KubeDNSUpstream is running at https://34.31.186.162/api/v1/namespaces/kube-system/services/kube-dns-upstream:dns/proxy
+Metrics-server is running at https://34.31.186.162/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get node
+NAME                                                  STATUS   ROLES    AGE    VERSION
+gk3-autopilot-cluster-pr-default-pool-efe88ada-0670   Ready    <none>   153m   v1.27.2-gke.2100
+gk3-autopilot-cluster-private--pool-1-89621121-zktk   Ready    <none>   150m   v1.27.2-gke.2100
+
+
+
+
+
+
+Switch between contexts (clusters)
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config current-context
+gke_project7-390220_us-central1_autopilot-cluster-private-1
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config view
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://34.31.186.162
+  name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://34.28.66.170
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+contexts:
+- context:
+    cluster: gke_project7-390220_us-central1_autopilot-cluster-private-1
+    user: gke_project7-390220_us-central1_autopilot-cluster-private-1
+  name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+- context:
+    cluster: gke_project7-390220_us-central1_standard-cluster-private-1
+    user: gke_project7-390220_us-central1_standard-cluster-private-1
+  name: gke_project7-390220_us-central1_standard-cluster-private-1
+current-context: gke_project7-390220_us-central1_autopilot-cluster-private-1
+kind: Config
+preferences: {}
+users:
+- name: gke_project7-390220_us-central1_autopilot-cluster-private-1
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args: null
+      command: gke-gcloud-auth-plugin
+      env: null
+      installHint: Install gke-gcloud-auth-plugin for use with kubectl by following
+        https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+      interactiveMode: IfAvailable
+      provideClusterInfo: true
+- name: gke_project7-390220_us-central1_standard-cluster-private-1
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args: null
+      command: gke-gcloud-auth-plugin
+      env: null
+      installHint: Install gke-gcloud-auth-plugin for use with kubectl by following
+        https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+      interactiveMode: IfAvailable
+      provideClusterInfo: true
+
+
+Switch contexts
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get node
+NAME                                                  STATUS   ROLES    AGE    VERSION
+gk3-autopilot-cluster-pr-default-pool-efe88ada-0670   Ready    <none>   159m   v1.27.2-gke.2100
+gk3-autopilot-cluster-private--pool-1-89621121-zktk   Ready    <none>   157m   v1.27.2-gke.2100
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config use-context gke_project7-390220_us-central1_standard-cluster-private-1
+Switched to context "gke_project7-390220_us-central1_standard-cluster-private-1".
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get node
+NAME                                                  STATUS   ROLES    AGE     VERSION
+gke-standard-cluster-pri-default-pool-a7f4fa81-7s4l   Ready    <none>   32h     v1.26.5-gke.1200
+gke-standard-cluster-pri-default-pool-aa4258fb-wtwx   Ready    <none>   36h     v1.26.5-gke.1200
+gke-standard-cluster-pri-default-pool-e06e7d2b-7zb3   Ready    <none>   5h56m   v1.26.5-gke.1200
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config current-context
+gke_project7-390220_us-central1_standard-cluster-private-1
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl cluster-info
+Kubernetes control plane is running at https://34.28.66.170
+GLBCDefaultBackend is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+KubeDNS is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://34.28.66.170/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+
+
+
+
+List all of the contexts and clusters configured in kubeconfig file
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config get-contexts
+CURRENT   NAME                                                          CLUSTER                                                       AUTHINFO                                                      NAMESPACE
+          gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   
+*         gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1  
+
+NOTE * for the current view
+
+
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config get-clusters
+NAME
+gke_project7-390220_us-central1_autopilot-cluster-private-1
+gke_project7-390220_us-central1_standard-cluster-private-1
+
+@@@@@@@
+
+kubectl config current-context
+gke_project7-390220_us-central1_standard-cluster-private-1
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config get-contexts   
+CURRENT   NAME                                                          CLUSTER                                                       AUTHINFO                                                      NAMESPACE
+          gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   
+*         gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config use-context gke_project7-390220_us-central1_autopilot-cluster-private-1
+Switched to context "gke_project7-390220_us-central1_autopilot-cluster-private-1".
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get pods
+No resources found in default namespace.
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % pwd
+/Users/davemastropolo/.kube/course5_GKE_HYBRID_CLUSTER
+davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get node
+NAME                                                  STATUS   ROLES    AGE    VERSION
+gk3-autopilot-cluster-pr-default-pool-efe88ada-0670   Ready    <none>   3h9m   v1.27.2-gke.2100
+gk3-autopilot-cluster-private--pool-1-89621121-zktk   Ready    <none>   3h6m   v1.27.2-gke.2100
