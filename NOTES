@@ -316,16 +316,22 @@ NAME
 gke_project7-390220_us-central1_autopilot-cluster-private-1
 gke_project7-390220_us-central1_standard-cluster-private-1
 
-@@@@@@@
+@@@@@@@ main commands
 
 kubectl config current-context
 gke_project7-390220_us-central1_standard-cluster-private-1
+
+
 davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config get-contexts   
 CURRENT   NAME                                                          CLUSTER                                                       AUTHINFO                                                      NAMESPACE
           gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   gke_project7-390220_us-central1_autopilot-cluster-private-1   
-*         gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    
+*         gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1    gke_project7-390220_us-central1_standard-cluster-private-1 
+
+
 davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl config use-context gke_project7-390220_us-central1_autopilot-cluster-private-1
 Switched to context "gke_project7-390220_us-central1_autopilot-cluster-private-1".
+
+
 davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % kubectl get pods
 No resources found in default namespace.
 davemastropolo@Margarets-MacBook-Air course5_GKE_HYBRID_CLUSTER % pwd
